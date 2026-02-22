@@ -138,11 +138,29 @@ def delete_all(path):
        
     return out    
 
-def flash_stats(filepath='/'):
+def flash_stat(filepath='/'):
     # Get the available free space and size for the path
-    stat = os.statvfs(filepath)
-    size = stat[1] * stat[2]
-    free = stat[0] * stat[3]
-    used = size - free
-    
-    return {'free':free,'size':size,}
+    stat = os.statvfs(filepath) # filepath is imaterial but required
+#     stat for the entire file system:
+#         (block size,
+#          block size,
+#          size of file system in blocks,
+#          Free space in blocks,
+#          then some stuff I dont care about...
+#          )
+    fs_size = stat[0] * stat[2]
+    fs_free = stat[0] * stat[3]
+    # now get the info on the filepath file or dir
+    stat = os.stat(filepath)
+    mode = stat[0]
+    is_dir = mode == 16384 # making a guess here...
+    size = stat[6] #size in bytes
+    modified = stat[7] #directories return 0 here
+        
+    return {'free':fs_free,
+            'size':size,
+            'is_dir':is_dir,
+            'mode':mode,
+            'modified':modified,
+            'fs_size':fs_size,
+            }        
